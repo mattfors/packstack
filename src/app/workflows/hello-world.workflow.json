@@ -1,0 +1,49 @@
+{
+  "id": "hello-world-workflow",
+  "type": "workflow",
+  "label": "Hello World Demo",
+  "children": [
+    {
+      "id": "hello-stepper",
+      "type": "workflow",
+      "layout": "stepper",
+      "label": "Say Hello",
+      "children": [
+        {
+          "id": "greet-user",
+          "type": "workflow",
+          "subtype": "step",
+          "label": "Greeting",
+          "component": "text-display",
+          "display": {
+            "value": "Hello, World!"
+          },
+          "actions": [
+            {
+              "type": "confirm",
+              "label": "Continue",
+              "trigger": "button"
+            }
+          ]
+        },
+        {
+          "id": "farewell-user",
+          "type": "workflow",
+          "subtype": "step",
+          "label": "Farewell",
+          "component": "text-display",
+          "display": {
+            "value": "Goodbye, World!"
+          },
+          "actions": [
+            {
+              "type": "confirm",
+              "label": "Done",
+              "trigger": "button"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
