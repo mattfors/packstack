@@ -1,16 +1,11 @@
 import { Routes } from '@angular/router';
-import { PouchDemoComponent } from './pouch-demo.component';
-import { WorkflowViewerComponent } from './workflow-viewer.component';
-import { PouchExplorerComponent } from './pouch-explorer.component';
-import { WorkflowViewComponent } from './workflow-view.component';
+import { WorkflowRouteComponent } from './presentational/workflow-route/workflow-route.component';
 
 export const routes: Routes = [
-  { path: 'pouch-demo', component: PouchDemoComponent },
-  { path: 'workflows', component: WorkflowViewerComponent },
-  { path: 'pouch', component: PouchExplorerComponent },
-  { path: 'pouch/:type', component: PouchExplorerComponent },
-  { path: 'pouch/:type/:id', component: PouchExplorerComponent },
-  { path: 'workflow/:id', component: WorkflowViewComponent },
+  {
+    path: 'workflow/:id/:index',
+    component: WorkflowRouteComponent
+  },
   {
     path: 'workflow-admin',
     loadChildren: () =>

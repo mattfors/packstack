@@ -1,0 +1,7 @@
+<ng-container *ngIf="parentView$ | async as parent">
+  <app-workflow-renderer [node]="parent" [child]="(childView$ | async) ?? undefined"></app-workflow-renderer>
+</ng-container>
+
+<ng-template #loading>
+  <p>Loading workflow...</p>
+</ng-template>

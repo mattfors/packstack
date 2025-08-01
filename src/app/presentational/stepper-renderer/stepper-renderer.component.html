@@ -1,0 +1,5 @@
+<div class="stepper">
+  <ng-container *ngFor="let step of node.children; let i = index">
+    <app-step-renderer [node]="step" [active]="i === node.activeIndex" />
+  </ng-container>
+</div>

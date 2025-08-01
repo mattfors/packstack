@@ -1,0 +1,4 @@
+<div class="workflow-renderer">
+  <h2 class="workflow-title">{{ node.label || node.id }}</h2>
+  <app-workflow-child-renderer *ngIf="child" [node]="child"></app-workflow-child-renderer>
+</div>

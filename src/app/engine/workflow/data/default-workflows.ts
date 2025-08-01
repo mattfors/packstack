@@ -19,6 +19,33 @@ export const defaultWorkflows: Workflow[] = [
             _id: 'step-1-1',
             subtype: 'step',
             label: 'Greeting'
+          },
+          {
+            id: 'step-1-2',
+            _id: 'step-1-2',
+            subtype: 'step',
+            label: 'Goodbye'
+          }
+        ]
+      },
+      {
+        id: 'step-2',
+        _id: 'step-2',
+        type: 'workflow',
+        subtype: 'stepper',
+        label: 'Say Hola',
+        children: [
+          {
+            id: 'step-2-1',
+            _id: 'step-2-1',
+            subtype: 'step',
+            label: 'Buenos dias!'
+          },
+          {
+            id: 'step-2-2',
+            _id: 'step-2-2',
+            subtype: 'step',
+            label: 'Buenos noches!'
           }
         ]
       }
