@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { combineLatest, defer, Observable, of, throwError } from 'rxjs';
 import { catchError, distinctUntilChanged, shareReplay, startWith, switchMap } from 'rxjs/operators';
-import { PersistenceService } from '../../core/persistence/persistence.service';
-import { Workflow } from '../../core/model/workflow.model';
+import { PersistenceService } from './persistence.service';
+import { Workflow } from '../model/workflow.model';
 
 
 @Injectable({ providedIn: 'root' })

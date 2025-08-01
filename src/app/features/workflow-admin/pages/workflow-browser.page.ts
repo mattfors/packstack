@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 
 import { Observable } from 'rxjs';
 import { Workflow } from '../../../core/model/workflow.model';
-import { WorkflowPersistenceService } from '../../../engine/workflow/workflow-persistence.service';
+import { WorkflowPersistenceService } from '../../../core/persistence/workflow-persistence.service';
 import { AsyncPipe, NgForOf, NgIf } from '@angular/common';
 import { RouterLink } from '@angular/router';
 

@@ -50,5 +50,60 @@ export const defaultWorkflows: Workflow[] = [
         ]
       }
     ]
+  },
+
+  {
+    _id: 'workflow:picking',
+    id: 'picking',
+    label: 'Picking',
+    type: 'workflow',
+    children: [
+      {
+        id: 'list-work',
+        _id: 'list-work',
+        type: 'workflow',
+        subtype: 'table',
+        label: 'List Work',
+      },
+      {
+        id: 'perform-work',
+        _id: 'perform-work',
+        type: 'workflow',
+        subtype: 'stepper',
+        label: 'Pick',
+        children: [
+          {
+            id: 'scan-bin',
+            _id: 'scan-bin',
+            subtype: 'step',
+            label: 'Scan Bin'
+          },
+          {
+            id: 'scan-carton',
+            _id: 'scan-carton',
+            subtype: 'step',
+            label: 'Scan Carton'
+          },
+          {
+            id: 'country-of-origin',
+            _id: 'country-of-origin',
+            subtype: 'step',
+            label: 'Verify Country of Origin'
+          },
+          {
+            id: 'scan-parts',
+            _id: 'scan-parts',
+            subtype: 'step',
+            label: 'Scan Parts'
+          },
+          {
+            id: 'rescan-carton',
+            _id: 'rescan-carton',
+            subtype: 'step',
+            label: 'ReScan Carton'
+          }
+        ]
+      }
+    ]
   }
 ];

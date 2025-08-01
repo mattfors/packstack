@@ -1,5 +1,5 @@
 import { inject, provideAppInitializer } from '@angular/core';
-import { WorkflowPersistenceService } from './workflow-persistence.service';
+import { WorkflowPersistenceService } from '../../core/persistence/workflow-persistence.service';
 import { defaultWorkflows } from './data/default-workflows'; // array of workflows
 import { firstValueFrom } from 'rxjs';
 import { Workflow } from '../../core/model/workflow.model';

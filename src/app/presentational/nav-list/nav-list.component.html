@@ -1,0 +1,14 @@
+<ul class="nav-list" *ngIf="navItems$ | async as items">
+  <ng-container *ngFor="let item of items">
+    <li>
+      <a [routerLink]="item.route">{{ item.label }}</a>
+      <ul *ngIf="item.children?.length">
+        <ng-container *ngFor="let child of item.children">
+          <li>
+            <a [routerLink]="child.route">{{ child.label }}</a>
+          </li>
+        </ng-container>
+      </ul>
+    </li>
+  </ng-container>
+</ul>

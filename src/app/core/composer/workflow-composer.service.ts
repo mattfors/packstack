@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject, combineLatest, of } from 'rxjs';
 import { map, switchMap, catchError } from 'rxjs/operators';
-import { WorkflowPersistenceService } from '../../engine/workflow/workflow-persistence.service';
+import { WorkflowPersistenceService } from '../persistence/workflow-persistence.service';
 import { StepperViewNode, WorkflowViewNode } from '../model/workflow-view-node.model';
 import { Workflow } from '../model/workflow.model';
 

@@ -3,7 +3,7 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable, switchMap, tap } from 'rxjs';
 import { AsyncPipe, JsonPipe, NgIf } from '@angular/common';
 import { Workflow } from '../../../workflows/workflow.service';
-import { WorkflowPersistenceService } from '../../../engine/workflow/workflow-persistence.service';
+import { WorkflowPersistenceService } from '../../../core/persistence/workflow-persistence.service';
 
 
 @Component({

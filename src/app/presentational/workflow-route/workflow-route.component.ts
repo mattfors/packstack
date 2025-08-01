@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { switchMap } from 'rxjs';
-import { WorkflowPersistenceService } from '../../engine/workflow/workflow-persistence.service';
+import { WorkflowPersistenceService } from '../../core/persistence/workflow-persistence.service';
 import { CommonModule } from '@angular/common';
 import { WorkflowComposerService } from '../../core/composer/workflow-composer.service';
 import { WorkflowRendererComponent } from '../workflow-renderer/workflow-renderer.component';
@@ -23,6 +23,7 @@ export class WorkflowRouteComponent {
     private route: ActivatedRoute,
     private composer: WorkflowComposerService
   ) {
+    console.log('reloading workflow route');
     this.route.paramMap.subscribe(params => {
       const id = params.get('id');
       const index = Number(params.get('index') ?? '0');
