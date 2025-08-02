@@ -25,7 +25,7 @@ jobs:
         run: npm run build:gh-pages
 
       - name: Copy index.html to 404.html
-        run: cp dist/packstack/index.html dist/packstack/404.html
+        run: cp dist/packstack/browser/index.html dist/packstack/browser/404.html
 
       - name: Deploy to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@v4.6.1
