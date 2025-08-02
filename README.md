@@ -6,6 +6,12 @@ Rather than building bespoke UI components for every business process, Packstack
 
 Packstack’s architecture encourages reusability, separation of concerns, and introspectable logic — enabling rapid iteration and cleaner maintenance as industrial needs evolve.
 
+
+## 🌐 Demo
+
+Check out the live demo on GitHub Pages:
+**[https://mattfors.github.io/packstack](https://mattfors.github.io/packstack)**
+
 ---
 
 ## 🧱 Core Architecture
