@@ -1,59 +1,111 @@
-# Packstack
+# 📦 Packstack
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 19.2.15.
+Packstack is a modular, low-code workflow engine designed for mobile web apps in industrial environments.
 
-## Development server
+Rather than building bespoke UI components for every business process, Packstack lets you define structured workflows using configuration files and declarative state logic. This approach prevents the typical UI bloat that occurs when business logic leaks into shared components or when developers repeatedly reinvent similar interaction patterns for each process.
 
-To start a local development server, run:
+Packstack’s architecture encourages reusability, separation of concerns, and introspectable logic — enabling rapid iteration and cleaner maintenance as industrial needs evolve.
 
-```bash
-ng serve
+---
+
+## 🧱 Core Architecture
+
+### 🔧 Workflow Definitions
+Workflows are defined as structured configuration files—JSON under the hood—but can be authored in:
+- JSON
+- TOML
+- (Eventually) a drag-and-drop visual editor for admins
+
+These definitions describe the sequence of steps, actions, and data models for a given industrial process.
+
+### 🧠 View Composition
+The core rendering logic is driven by the `WorkflowViewModel` and its associated *conductor*. Together, they take:
+- **Current state** (e.g. scanned items, selected actions)
+- **Screen configuration** (defined in the workflow)
+- And produce a tree of view nodes that map directly to presentational components.
+
+This enables UI to be dynamically generated based on declarative state + definitions, rather than imperative template logic.
+
+### 💾 Local-First Storage
+Packstack uses **PouchDB** to store:
+- Workflow definitions
+- Runtime state for each workflow instance
+
+This allows for full local-first operation, offline resilience, and real-time reactivity across components and services.
+
+---
+
+## 🔁 Execution Flow
+
+Packstack turns structured definitions and state into dynamic UI with reactive updates. Here's how a typical interaction unfolds:
+
+### 1. Route Activation
+A user navigates to a URL like:
+
+```
+/workflow/:id/:index
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+The `WorkflowRouteComponent` calls the `WorkflowComposerService`, which:
+- Loads the workflow definition from PouchDB (based on `:id`)
+- Locates the current subworkflow or step (based on `:index`)
+- Generates a `WorkflowViewModel` to describe what should be displayed
 
-## Code scaffolding
+This view model powers all rendering, including steppers, nested components, and custom actions.
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+### 2. User Interaction → Event
+Presentational components (e.g. buttons, selectors, scanners) emit **workflow events** when users interact.
 
+While not yet fully implemented, the design intends for:
+- Events to be centrally dispatched (likely via a `WorkflowService` or similar)
+- Each event to correspond to a defined action type (e.g. `submitForm`, `goToStep`, `scanBarcode`)
+
+### 3. Event Reduction → State Update
+Incoming events will be processed by a reducer pipeline:
+- **Generic reducers** handle shared logic across workflows
+- **Domain-specific reducers** can be plugged in to extend functionality
+
+Reducers will update the current workflow instance state, which is persisted to PouchDB.
+
+### 4. Recomposition and Rerender
+Once state is updated, the `WorkflowComposerService` reacts to the change and regenerates a fresh `WorkflowViewModel`.
+
+This triggers Angular’s reactive binding system to rerender only the parts of the view that need to change.
+
+### 5. Subworkflows
+Subworkflows are explicitly triggered by the user via **navigation events** (e.g. tapping “Next” or “Verify”). They are loaded and rendered through the same composition system, allowing for deeply nested yet declarative workflows.
+
+---
+
+## 🛠️ Getting Started
+
+To run Packstack locally:
+
+### 📦 Install Dependencies
 ```bash
-ng generate component component-name
+npm install
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
+### ▶️ Start the Dev Server
 ```bash
-ng generate --help
+npm start
 ```
 
-## Building
+This will compile and serve the app on [http://localhost:4200](http://localhost:4200) with hot reloading.
 
-To build the project run:
-
+### 🧪 Run Tests
 ```bash
-ng build
+npm test
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
+### 🧹 Lint and Format
 ```bash
-ng test
+npm run lint
 ```
 
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
+### ⚙️ Build for Production
 ```bash
-ng e2e
+npm run build
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Packstack uses Angular, Tailwind, and PouchDB. Make sure you have Node.js (18+) installed.
