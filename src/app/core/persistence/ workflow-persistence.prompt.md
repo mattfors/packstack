@@ -1,11 +1,12 @@
-# 🧠 Prompt: WorkflowPersistenceService (Angular, RxJS, PouchDB-backed)
+# 🧠 Prompt: WorkflowPersistenceService (Angular, RxJS, PouchDB-backed, Enveloped)
 
-You are building a domain-specific `WorkflowPersistenceService` in Angular that wraps a generic `PersistenceService` to provide reactive access to `Workflow` documents.
+You are building a domain-specific `WorkflowPersistenceService` in Angular that wraps a generic `PersistenceService` to provide reactive access to `Workflow` documents stored inside `DocEnvelope<Workflow>` objects.
 
 This service specializes in:
-- Fetching and updating workflows by ID
-- Listing all workflows
-- Observing workflow changes as live streams
+- Observing unwrapped `Workflow` documents for runtime components
+- Returning full `DocEnvelope` for workflow editors and sync tools
+- Tracking all workflow documents by ID prefix
+- Providing write access only through full `DocEnvelope`, not raw objects
 
 ---
 
@@ -13,28 +14,33 @@ This service specializes in:
 
 ### Methods
 
+- `workflowEnvelope$(id: string): Observable<DocEnvelope<Workflow> | undefined>`  
+  Returns a live observable of a single full `DocEnvelope` for the given workflow ID.
+
 - `workflow$(id: string): Observable<Workflow | undefined>`  
-  Returns a live observable of a single `Workflow` document with the given ID.
+  Returns just the `Workflow` data from the envelope. Suitable for runtime consumers like the UI engine.
 
 - `allWorkflows$(): Observable<Workflow[]>`  
-  Returns all `Workflow` documents with IDs prefixed by `workflow:`. This should reactively update when changes are detected via `PersistenceService.changes$`.
+  Returns all workflow documents (unwrapped) whose `_id` starts with `workflow:`. Automatically updates when the database changes.
 
-- `saveWorkflow(workflow: Workflow): Observable<any>`  
-  Saves or updates a `Workflow` document.
+- `saveWorkflow(envelope: DocEnvelope<Workflow>): Observable<any>`  
+  Saves or updates a workflow document. Requires an envelope (with `_id`, optional `_rev`, and `data`).
 
-- `deleteWorkflow(workflow: Workflow): Observable<any>`  
-  Deletes a `Workflow` document. Accepts only workflows that include both `_id` and `_rev`.
+- `deleteWorkflow(envelope: DocEnvelope<Workflow>): Observable<any>`  
+  Deletes a workflow document using its `_id` and `_rev`.
 
 ---
 
 ## ⚙️ Implementation Notes
 
-- Use the injected `PersistenceService` to perform all reads/writes
-- Listen to `persistence.changes$` and re-emit filtered updates for workflows
-- Always return **Observables**, never Promises
-- The `_id` field must start with `"workflow:"`
-- Catch errors and propagate using `throwError(() => err)`
-- Use operators like `defer()`, `map()`, `filter()`, `distinctUntilChanged()`, `switchMap()`, etc.
+- Use the injected `PersistenceService` for all reads/writes
+- Stream `changes$` to trigger reloading for reactive observables
+- Use `combineLatest()` + `switchMap()` to re-fetch live documents
+- Use `shareReplay(1)` to avoid redundant queries
+- Always wrap/unwrap via `DocEnvelope<T>`
+- Prefer `map(env => env?.data)` to project wrapped → unwrapped
+- Use `throwError(() => err)` for error propagation
+- Do not expose save/delete for raw `Workflow` objects — only for envelopes
 
 ---
 
@@ -53,18 +59,22 @@ Class name should be `WorkflowPersistenceService`.
 ## 🧪 Example Usage
 
 ```ts
-workflowPersistence.allWorkflows$().subscribe(workflows => ...);
 workflowPersistence.workflow$('workflow:hello-world').subscribe(workflow => ...);
-workflowPersistence.saveWorkflow({...}).subscribe();
-workflowPersistence.deleteWorkflow({...}).subscribe();
+workflowPersistence.workflowEnvelope$('workflow:hello-world').subscribe(env => ...);
+workflowPersistence.allWorkflows$().subscribe(workflows => ...);
+workflowPersistence.saveWorkflow({ _id: 'workflow:abc', data: {...} }).subscribe();
+workflowPersistence.deleteWorkflow({ _id: 'workflow:abc', _rev: '1-xyz', data: {...} }).subscribe();
 ```
 
 ---
 
 ## 🤖 For AI or Junior Dev Assistants
 
-This service provides a clean API for working with `Workflow` documents, abstracting storage details.  
-AI agents and junior devs should use this to load and modify workflows in components and editors.
+This service provides a clean, domain-specific layer for managing `Workflow` documents.  
+The separation between wrapped (`DocEnvelope`) and unwrapped (`Workflow`) is important for architectural clarity.
 
-- Avoid directly using the lower-level `PersistenceService` for workflow data.
-- All changes to workflows should go through this domain service.
+- Use `workflow$()` in UI components.
+- Use `workflowEnvelope$()` in editors, tools, or sync-related features.
+- Always pass envelopes to `saveWorkflow()` and `deleteWorkflow()`.
+
+Do not manipulate `_id` or `_rev` manually in components — always go through this service.

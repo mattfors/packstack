@@ -17,11 +17,11 @@ export class NavComposerService {
   private toNavItem(workflow: Workflow): NavItem {
     console.log('workflow:', workflow);
     return {
-      label: workflow.label || workflow._id,
-      route: `/workflow/${workflow._id}/0`,
+      label: workflow.label || workflow.id,
+      route: `/workflow/${workflow.id}/0`,
       children: (workflow.children ?? []).map((child, index) => ({
         label: child.label ?? `Step ${index + 1}`,
-        route: `/workflow/${workflow._id}/${index}`
+        route: `/workflow/${workflow.id}/${index}`
       }))
     };
   }

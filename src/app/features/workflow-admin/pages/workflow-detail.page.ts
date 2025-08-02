@@ -3,8 +3,9 @@ import { ActivatedRoute } from '@angular/router';
 import { Observable, switchMap, tap } from 'rxjs';
 import { JsonPipe, AsyncPipe, NgIf } from '@angular/common';
 import { FormsModule, NgModel } from '@angular/forms';
-import { Workflow } from '../../../workflows/workflow.service';
 import { WorkflowPersistenceService } from '../../../core/persistence/workflow-persistence.service';
+import { DocEnvelope } from '../../../core/model/doc-envelope.model';
+import { Workflow } from '../../../core/model/workflow.model';
 
 @Component({
   selector: 'app-workflow-detail-page',
@@ -27,7 +28,7 @@ import { WorkflowPersistenceService } from '../../../core/persistence/workflow-p
       <div class="mt-4 flex gap-4">
         <button
           class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-500"
-          (click)="saveJson()"
+          (click)="saveJson(workflow)"
         >
           Save
         </button>
@@ -42,7 +43,7 @@ import { WorkflowPersistenceService } from '../../../core/persistence/workflow-p
   `
 })
 export class WorkflowDetailPage {
-  workflow$: Observable<Workflow | undefined>;
+  workflow$: Observable<DocEnvelope<Workflow> | undefined>;
   editedJson = '';
 
   constructor(
@@ -50,27 +51,32 @@ export class WorkflowDetailPage {
     private workflowService: WorkflowPersistenceService
   ) {
     this.workflow$ = this.route.paramMap.pipe(
-      switchMap(params => this.workflowService.workflow$(params.get('id')!)),
+      switchMap(params => this.workflowService.workflowEnvelope$(params.get('id')!)),
       tap(workflow => {
         if (workflow) {
-          this.editedJson = JSON.stringify(workflow, null, 2);
+          this.editedJson = JSON.stringify(workflow.data, null, 2);
         }
       })
     );
   }
 
-  saveJson() {
+  saveJson(envelope: DocEnvelope<Workflow>) {
     try {
       const parsed = JSON.parse(this.editedJson);
-      this.workflowService.saveWorkflow(parsed).subscribe(() => {
-
+      const updated: DocEnvelope<Workflow> = {
+        _id: envelope._id,
+        _rev: envelope._rev,
+        data: parsed,
+      };
+      this.workflowService.saveWorkflow(updated).subscribe(() => {
+        // Optionally show success toast here
       });
     } catch (err) {
       alert('Invalid JSON!');
     }
   }
 
-  resetJson(original: Workflow) {
-    this.editedJson = JSON.stringify(original, null, 2);
+  resetJson(envelope: DocEnvelope<Workflow>) {
+    this.editedJson = JSON.stringify(envelope.data, null, 2);
   }
 }

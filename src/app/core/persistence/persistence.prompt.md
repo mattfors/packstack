@@ -1,76 +1,85 @@
-# 🧠 Prompt: Generic PersistenceService (PouchDB, RxJS, Observable-Based)
+# 🧠 Prompt: Generic PersistenceService (PouchDB + RxJS) with Envelopes
 
-You are building a generic `PersistenceService` in Angular that wraps **PouchDB** using **RxJS** to provide reactive, model-agnostic CRUD access to a local database.
+You are building a generic `PersistenceService` in Angular that wraps **PouchDB** using **RxJS** to provide reactive, envelope-based, model-agnostic CRUD access to a local database.
 
-The goal is to abstract storage so that:
-- Other services (like `WorkflowPersistenceService`) can consume domain-specific models without worrying about storage implementation.
-- Future storage layers (REST, IndexedDB, Firebase) could replace PouchDB with minimal changes.
+This service uses a standard envelope format to isolate application data from persistence concerns like `_id` and `_rev`.
 
 ---
 
-## ✅ Functional Requirements
+## ✅ Envelope Format
 
-### Core Methods
+All stored documents conform to the `DocEnvelope<T>` format:
 
-- `getDoc<T>(id: string): Observable<T | undefined>`  
-  Fetch a document by ID. Should return `undefined` if not found.
-
-- `getAllByPrefix<T>(prefix: string): Observable<T[]>`  
-  Return all documents whose `_id` starts with a given prefix.
-
-- `putDoc<T extends { _id: string }>(doc: T): Observable<any>`  
-  Insert or update a document. Must return an `Observable`, not a `Promise`.
-
-- `removeDoc<T extends { _id: string; _rev: string }>(doc: T): Observable<any>`  
-  Delete a document by ID and revision. Must return an `Observable`, not a `Promise`.
-
-### Change Tracking
-
-- `changes$`: Observable stream of `PouchDB.Core.ChangesResponseChange`  
-  This should wrap `db.changes({ live: true })` and emit change events as they happen.
-  - Must include `shareReplay(1)` so subscribers don't miss events.
-  - Must cancel the feed on unsubscribe.
-
----
-
-## ⚙️ Implementation Constraints
-
-- Use `pouchdb-browser`
-- Expose all methods using `Observable`, not `Promise`
-- Use RxJS operators: `from()`, `defer()`, `map()`, `catchError()`, `throwError()`, `shareReplay(1)`
-- Use `of(undefined)` to gracefully handle 404s in `getDoc()`
-- Avoid `async`/`await` or `new Observable(...)` with `async` logic inside
-- Must be `@Injectable({ providedIn: 'root' })`
-- Must not throw raw errors from PouchDB — wrap in `throwError(() => err)`
-
----
-
-## 📁 Output Path
-
-Write this service to:
-
-```
-src/app/core/persistence/persistence.service.ts
+```ts
+export interface DocEnvelope<T> {
+  _id: string;
+  _rev?: string;
+  data: T;
+}
 ```
 
-Class name should be `PersistenceService`.
+---
+
+## ✅ Exposed Methods
+
+### `getDoc<T>(id: string): Observable<DocEnvelope<T> | undefined>`
+
+Fetch a single envelope by `_id`. Emits `undefined` if not found.
+
+---
+
+### `getAllByPrefix<T>(prefix: string): Observable<DocEnvelope<T>[]>`
+
+Return all envelopes whose `_id` starts with the given prefix.
+
+---
+
+### `putDoc<T>(doc: DocEnvelope<T>): Observable<any>`
+
+Insert or update an envelope document in the local database.
+
+---
+
+### `removeDoc<T>(doc: DocEnvelope<T>): Observable<any>`
+
+Delete a document envelope using its `_id` and `_rev`.
+
+---
+
+### `changes$: Observable<PouchDB.Core.ChangesResponseChange>`
+
+Live stream of all changes in the database (using `db.changes({ live: true })`). Emits full change objects with shared replay and teardown cleanup.
+
+---
+
+## ⚙️ Usage Patterns
+
+- Downstream domain services like `WorkflowPersistenceService` or `EventService` consume this API without needing to understand persistence.
+- Business models (`Workflow`, `Event`, etc.) live inside the `data` field of the envelope.
+- All methods use `Observable` wrappers to support reactive pipelines and Angular idioms.
 
 ---
 
 ## 🧪 Example Usage
 
 ```ts
-persistence.getDoc<Item>('item:abc').subscribe(item => ...);
-persistence.getAllByPrefix<Workflow>('workflow:').subscribe(workflows => ...);
-persistence.putDoc({ _id: 'workflow:test', label: 'Test' }).subscribe();
-workflowPersistence.workflow$('workflow:hello-world').subscribe(...);
+// Get one document
+persistence.getDoc<Item>('item:abc').subscribe(env => console.log(env?.data));
+
+// Save a document
+persistence.putDoc({
+  _id: 'event:123',
+  data: { ... }
+}).subscribe();
+
+// Watch live changes
+persistence.changes$.subscribe(change => console.log(change));
 ```
 
 ---
 
-## 🤖 For AI or Junior Dev Assistants
+## 📦 Future-Proofing
 
-This prompt is designed to enable generation of a robust, extensible persistence layer.
-
-- Encourage downstream domain services (e.g. `workflow-persistence.service.ts`) to wrap this without duplicating logic.
-- Ensure observables are used for all async operations to promote composability in Angular.
+- All business logic is decoupled from PouchDB: this layer can be swapped out with IndexedDB, REST, or Firebase.
+- Envelopes make syncing and rollback safer and more uniform.
+- Linters and types can enforce usage of envelopes throughout the app.
